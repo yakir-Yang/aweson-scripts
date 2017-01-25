@@ -1,24 +1,29 @@
 #! /bin/bash
 
-# 08:00.0  TenGigabitEthernet8/0/0  192.168.120.2/24  Port7
-# 08:00.1  TenGigabitEthernet8/0/1  192.168.96.2/24   Port8
+# ens3 172.18.250.21/16  nat-vnf-ssh
+# ens4 10.0.10.2/24      nat-vnf-in
+# ens5 172.18.250.17/16  nat-vnf-out
+#      172.18.250.19/16
 
-vppctl set int ip address TenGigabitEthernet8/0/0 192.168.120.2/24
-vppctl set int ip address TenGigabitEthernet8/0/1 192.168.92.2/24
-vppctl set int snat in TenGigabitEthernet8/0/0 out TenGigabitEthernet8/0/1
+vppctl set int ip address GigabitEthernet0/5/0 172.18.250.19/16
+vppctl set int ip address GigabitEthernet0/4/0 10.0.10.2/24
 
-vppctl snat add static mapping local 192.168.120.1 external 192.168.96.2
+vppctl set int snat in GigabitEthernet0/4/0 out GigabitEthernet0/5/0
+vppctl snat add address 172.18.250.19 - 172.18.250.19
+
+# TODO: need to feet user's network topology
+vppctl snat add static mapping local 168.24.4.4 external 172.18.250.17
+vppctl set ip arp proxy 172.18.250.17 - 172.18.250.17
+
+vppctl set interface  proxy-arp GigabitEthernet0/5/0 enable
+
 vppctl show snat verbose
 
-vppctl ip route add 192.168.120.0/24 via 192.168.120.1 TenGigabitEthernet8/0/0
-vppctl ip route add 0.0.0.0/0 via 192.168.96.1 TenGigabitEthernet8/0/1
+vppctl ip route add 0.0.0.0/0 via 172.18.0.1 GigabitEthernet0/5/0
+vppctl ip route add 168.24.4.0/24 via 10.0.10.1 GigabitEthernet0/4/0
 
-vppctl vreassm interface TenGigabitEthernet8/0/0 
-vppctl vreassm interface TenGigabitEthernet8/0/1
+vppctl vreassm interface GigabitEthernet0/4/0
+vppctl vreassm interface GigabitEthernet0/5/0
 
-vppctl set int state TenGigabitEthernet8/0/0 up
-vppctl set int state TenGigabitEthernet8/0/1 up
-
-vppctl set ip arp TenGigabitEthernet8/0/1 192.168.96.1  00:10:94:00:00:98
-vppctl set ip arp TenGigabitEthernet8/0/0 192.168.120.1 00:10:94:00:00:97
-vppctl show ip arp
+vppctl set int state GigabitEthernet0/4/0 up
+vppctl set int state GigabitEthernet0/5/0 up
