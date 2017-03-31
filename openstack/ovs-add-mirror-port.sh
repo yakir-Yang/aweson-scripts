@@ -1,7 +1,7 @@
 #! /bin/bash
 
 BRIDGE=${1:-br-int}
-PORT_UUID=${2:-"all"}
+PORT=${2:-"all"}
 
 ovs-vsctl show|grep Bridge | awk '{print $2}' | sed "s/\"//g" | \
     while read br; do \
@@ -18,15 +18,16 @@ ovs-vsctl add-port $BRIDGE dummy0
 
 ovs-vsctl --id=@m create mirror name=mirror-$BRIDGE -- add bridge $BRIDGE mirrors @m
 
-ovs-vsctl list port dummy0 | \
-    grep uuid | awk  '{print $3}' | xargs -i ovs-vsctl set mirror mirror-$BRIDGE output_port={}
+ovs-vsctl --columns=_uuid list port dummy0 | awk '{print $3}' |\
+    xargs -i ovs-vsctl set mirror mirror-$BRIDGE output_port={}
 
 # Listen all traffic input/output from bridge
-if [ $PORT_UUID == "all" ]; then
+if [ "$PORT" == "all" ]; then
     echo -e "\033[32m$BRIDGE: list all ports\033[0m"
     ovs-vsctl set mirror mirror-$BRIDGE select_all=1
 else
-    echo -e "\033[32m$BRIDGE: list port '$PORT_UUID'\033[0m"
+    echo -e "\033[32m$BRIDGE: list port '$PORT'\033[0m"
+    PORT_UUID=`ovs-vsctl --columns=_uuid list port $PORT | awk '{print $3}'`
     ovs-vsctl set mirror mirror-$BRIDGE select\_dst\_port=$PORT_UUID
     ovs-vsctl set mirror mirror-$BRIDGE select\_src\_port=$PORT_UUID
 fi
