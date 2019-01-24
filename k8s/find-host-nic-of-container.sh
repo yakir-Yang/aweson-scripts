@@ -17,9 +17,9 @@ fi
 if [ ! -z $ContainerNic ]; then
     nic=$ContainerNic
 else
-    for n in `docker exec -it ${container} bash -c "ls /sys/class/net"`; do
+    for n in `docker exec -it ${container} sh -c "ls --color=none /sys/class/net"`; do
         n=`echo $n | tr -d '\r'`
-        if [ $n != "lo" ]; then
+        if [[ $n != "lo" ]]; then
             nic="$nic $n"
         fi
     done
@@ -27,7 +27,8 @@ fi
 
 for n in $nic; do
     # find the container nic peer ifindex
-    iflink=`docker exec -it ${container} bash -c "cat /sys/class/net/${n}/iflink"`
+    iflink=`docker exec -it ${container} sh -c "cat /sys/class/net/${n}/iflink"`
+
     iflink=`echo $iflink|tr -d '\r'`
 
     veth=`grep -l $iflink /sys/class/net/veth*/ifindex`
@@ -35,5 +36,5 @@ for n in $nic; do
 
     echo -e "ContainerName:\t $container"
     echo -e "ContainerNic:\t $n"
-    echo -e "HostNic:\t $veth"
+    echo -e "HostNic:\t $veth\n"
 done
