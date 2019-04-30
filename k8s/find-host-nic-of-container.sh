@@ -17,8 +17,8 @@ fi
 if [ ! -z $ContainerNic ]; then
     nic=$ContainerNic
 else
-    for n in `docker exec -it ${container} sh -c "ifconfig | sed 's/[ \t].*//;/^\(lo\|\)$/d'"`; do
-        n=`echo $n | tr -d '\r'`
+    for n in `docker exec -it ${container} sh -c "ls --color=never /sys/class/net"`; do
+        n=`echo $n | tr -d '\r' | sed 's/@.*//g'`
         if [[ $n != "lo" ]]; then
             nic="$nic $n"
         fi
