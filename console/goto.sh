@@ -3,20 +3,45 @@
 
 # this variable should be complex enough to avoid naming pollution
 shortcut_and_paths=(
-	'work /home/yakir/work'
-
-	'ebc /home/yakir/work/ebc'
-	'wmg /home/yakir/github_projs/wheremygirls'
-	'wwwhtml /var/www/html'
-	'goproj /home/yakir/goproj'
-
-	'chmker /home/yakir/work/chromium/src/third_party/kernel/v3.14/'
-	'github /home/yakir/github_projs'
+	'proj         /Volumes/Projects'
+	'nsoft        /Volumes/Projects/nsoft-cloud'
+	'golib        /usr/local/Cellar/go/1.12.4/libexec/src'
+    #-----------------------------------------------------
+	'language     /Volumes/Projects/language'
+	'go           /Volumes/Projects/language/go/src'
+	'python       /Volumes/Projects/language/python'
+    #-----------------------------------------------------
+	'linux        /Volumes/Projects/linux'
+	'k8s          /Volumes/Projects/kubernetes'
+	'dockerfile   /Volumes/Projects/dockerfile'
+	'openstack    /Volumes/Projects/openstack'
+	'blogs        /Volumes/Projects/blogs'
+	'any101       /Volumes/Projects/any101'
+    #-----------------------------------------------------
+	'loadbalance  /Volumes/Projects/loadbalance'
+	'envoy        /Volumes/Projects/loadbalance/envoy'
+    #-----------------------------------------------------
+	'messagequeue /Volumes/Projects/message-queue'
+	'kafka        /Volumes/Projects/message-queue/kafka'
+    #-----------------------------------------------------
+	'elk          /Volumes/Projects/elk'
+	'tools        /Volumes/Projects/tools'
+    #-----------------------------------------------------
+	'turbo-proxy  /Volumes/Projects/nsoft-cloud/turbo-proxy'
+	'kubespray    /Volumes/Projects/nsoft-cloud/kubespray'
+	'charts       /Volumes/Projects/nsoft-cloud/charts'
+	'sdwan        /Volumes/Projects/nsoft-cloud/sdwan'
+	'helm         /Volumes/Projects/nsoft-cloud/helm'
+	'ovs          /Volumes/Projects/nsoft-cloud/ovs'
+	'vpp          /Volumes/Projects/nsoft-cloud/vpp'
+    #-----------------------------------------------------
+	'serverless   /Volumes/Projects/serverless'
+	'frontend     /Volumes/Projects/frontend'
 )
 
 tabwordlist=
 
-for ((i = 0; i < ${#shortcut_and_paths[@]}; i++)); do
+for ((i = 1; i <= ${#shortcut_and_paths[@]}; i++)); do
 	cmd=${shortcut_and_paths[$i]}
 	shortcut=${cmd%% *}
 	tabwordlist=$tabwordlist" "$shortcut
@@ -26,23 +51,28 @@ done
 complete -W "$tabwordlist" to
 
 to() {
-	for ((i = 0; i < ${#shortcut_and_paths[@]}; i++)); do
+  if [ -z $1 ]; then
+    tohelp
+    return
+  fi
+
+	for ((i = 1; i <= ${#shortcut_and_paths[@]}; i++)); do
 		cmd=${shortcut_and_paths[$i]}
 		shortcut=${cmd%% *}
-		path=${cmd#* }
+		ipath=${cmd##* }
 
 		if [ $shortcut = $1 ]; then
-			cd $path
+			cd $ipath
 		fi
 	done
 }
 
 tohelp() {
-	for ((i = 0; i < ${#shortcut_and_paths[@]}; i++)); do
+	for ((i = 1; i <= ${#shortcut_and_paths[@]}; i++)); do
 		cmd=${shortcut_and_paths[$i]}
 		shortcut=${cmd%% *}
-		path=${cmd#* }
-		echo -e "to $shortcut\t\t=>\t\tcd $path"
+		ipath=${cmd#* }
+		echo -e "$shortcut  $ipath"
 	done
-	echo -e "\033[0;33;1mexample: input 'to ${shortcut_and_paths[0]%% *}' to run 'cd ${shortcut_and_paths[0]#* }'\033[0m"
+	echo -e "\033[0;33;1mexample: input 'to ${shortcut_and_paths[1]%% *}' to run 'cd ${shortcut_and_paths[1]##* }'\033[0m"
 }
